@@ -772,9 +772,13 @@ impl Resolve {
             Type::Id(id) => match &self.types[*id].kind {
                 TypeDefKind::Type(t) => self.push_wasm(variant, t, result),
 
-                TypeDefKind::Handle(_) => todo!(),
+                TypeDefKind::Handle(_) => {
+                    result.push(WasmType::I32);
+                }
 
-                TypeDefKind::Resource(_) => todo!(),
+                TypeDefKind::Resource(_) => {
+                    result.push(WasmType::I32);
+                }
 
                 TypeDefKind::Record(r) => {
                     for field in r.fields.iter() {
