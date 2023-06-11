@@ -153,8 +153,8 @@ pub trait ValtypeEncoder<'a> {
                     TypeDefKind::Future(_) => todo!("encoding for future type"),
                     TypeDefKind::Stream(_) => todo!("encoding for stream type"),
                     TypeDefKind::Unknown => unreachable!(),
-                    TypeDefKind::Resource(_) => {},
-                    TypeDefKind::Handle(_) => {},
+                    TypeDefKind::Resource(_) => ComponentValType::Primitive(PrimitiveValType::U64),
+                    TypeDefKind::Handle(_) => ComponentValType::Primitive(PrimitiveValType::U64),
                 };
 
                 if let Some(name) = &ty.name {
