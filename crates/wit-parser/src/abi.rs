@@ -773,11 +773,11 @@ impl Resolve {
                 TypeDefKind::Type(t) => self.push_wasm(variant, t, result),
 
                 TypeDefKind::Handle(_) => {
-                    result.push(WasmType::I32);
+                    result.push(WasmType::I64);
                 }
 
                 TypeDefKind::Resource(_) => {
-                    result.push(WasmType::I32);
+                    result.push(WasmType::I64);
                 }
 
                 TypeDefKind::Record(r) => {
@@ -1295,10 +1295,8 @@ impl<'a, B: Bindgen> Generator<'a, B> {
                         self.emit(&ListLower { element, realloc });
                     }
                 }
-                TypeDefKind::Handle(_) => todo!(),
-                TypeDefKind::Resource(_) => {
-                    todo!();
-                }
+                TypeDefKind::Handle(_) => self.emit(&I64FromU64),
+                TypeDefKind::Resource(_) => self.emit(&I64FromU64),
                 TypeDefKind::Record(record) => {
                     self.emit(&RecordLower {
                         record,
@@ -1483,10 +1481,10 @@ impl<'a, B: Bindgen> Generator<'a, B> {
                     }
                 }
                 TypeDefKind::Handle(_) => {
-                    todo!();
+                    self.emit(&U64FromI64);
                 }
                 TypeDefKind::Resource(_) => {
-                    todo!();
+                    self.emit(&U64FromI64);
                 }
                 TypeDefKind::Record(record) => {
                     let mut temp = Vec::new();
@@ -1635,7 +1633,7 @@ impl<'a, B: Bindgen> Generator<'a, B> {
                 TypeDefKind::Type(t) => self.write_to_memory(t, addr, offset),
                 TypeDefKind::List(_) => self.write_list_to_memory(ty, addr, offset),
 
-                TypeDefKind::Handle(_) => todo!(),
+                TypeDefKind::Handle(_) => self.lower_and_emit(ty, addr, &I64Store { offset }),
 
                 // Decompose the record into its components and then write all
                 // the components into memory one-by-one.
@@ -1648,7 +1646,7 @@ impl<'a, B: Bindgen> Generator<'a, B> {
                     self.write_fields_to_memory(record.fields.iter().map(|f| &f.ty), addr, offset);
                 }
                 TypeDefKind::Resource(_) => {
-                    todo!()
+                    self.lower_and_emit(ty, addr, &I64Store { offset });
                 }
                 TypeDefKind::Tuple(tuple) => {
                     self.emit(&TupleLower { tuple, ty: id });
@@ -1840,11 +1838,11 @@ impl<'a, B: Bindgen> Generator<'a, B> {
                 TypeDefKind::List(_) => self.read_list_from_memory(ty, addr, offset),
 
                 TypeDefKind::Handle(_) => {
-                    todo!();
+                    self.emit_and_lift(ty, addr, &I64Load { offset });
                 }
 
                 TypeDefKind::Resource(_) => {
-                    todo!();
+                    self.emit_and_lift(ty, addr, &I64Load { offset });
                 }
 
                 // Read and lift each field individually, adjusting the offset
@@ -2064,11 +2062,11 @@ impl<'a, B: Bindgen> Generator<'a, B> {
                 }
 
                 TypeDefKind::Handle(_) => {
-                    todo!()
+                    
                 }
 
                 TypeDefKind::Resource(_) => {
-                    todo!()
+                   
                 }
 
                 TypeDefKind::Record(record) => {
